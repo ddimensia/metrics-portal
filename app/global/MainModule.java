@@ -100,9 +100,6 @@ public class MainModule extends AbstractModule {
         bind(HealthProvider.class)
                 .toProvider(ConfigTypedProvider.provider("http.healthProvider.type"))
                 .in(Scopes.SINGLETON);
-        bind(QueryExecutor.class)
-                .toProvider(ConfigTypedProvider.provider("query.executor.type"))
-                .in(Scopes.SINGLETON);
         bind(ActorRef.class)
                 .annotatedWith(Names.named("JvmMetricsCollector"))
                 .toProvider(JvmMetricsCollectorProvider.class)
@@ -209,7 +206,7 @@ public class MainModule extends AbstractModule {
         final Config executorsConfig = configuration.getConfig("query.executors");
         final Set<String> keys = executorsConfig.root().keySet();
         for (final String key: keys) {
-            final Config subconfig = executorsConfig.atKey(key);
+            final Config subconfig = executorsConfig.getConfig(key);
             final Injector childInjector = injector.createChildInjector(new ConfigurationOverrideModule(subconfig));
             final Class<? extends QueryExecutor> clazz = ConfigurationHelper.getType(environment, subconfig, "type");
             registryMapBuilder.put(key, childInjector.getInstance(clazz));
